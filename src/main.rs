@@ -1,3 +1,8 @@
+mod dataset;
+
+use std::path::PathBuf;
+use std::sync::Arc;
+
 use axum::{
     Router,
     extract::Path,
@@ -5,24 +10,45 @@ use axum::{
     response::{Html, IntoResponse, Response},
     routing::get,
 };
+use clap::Parser;
 use rust_embed::Embed;
+
+use dataset::Dataset;
 
 #[derive(Embed)]
 #[folder = "front/dist/"]
 struct Assets;
 
+#[derive(Parser)]
+#[command(name = "labelr", about = "OBB annotation tool")]
+struct Cli {
+    /// Path to images directory
+    #[arg(short, long)]
+    images: PathBuf,
+
+    /// Path to labels directory (defaults to sibling "labels" folder)
+    #[arg(short, long)]
+    labels: Option<PathBuf>,
+}
+
 #[tokio::main]
-async fn main() {
+async fn main() -> anyhow::Result<()> {
+    let cli = Cli::parse();
+
+    let dataset = Dataset::scan(&cli.images, cli.labels.as_deref())?;
+    println!("labels dir: {}", dataset.labels_dir.display());
+
+    let _dataset = Arc::new(dataset);
+
     let app = Router::new()
         .route("/", get(index))
         .route("/assets/{*path}", get(static_file));
 
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
-        .await
-        .unwrap();
-
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await?;
     println!("listening on http://127.0.0.1:3000");
-    axum::serve(listener, app).await.unwrap();
+    axum::serve(listener, app).await?;
+
+    Ok(())
 }
 
 async fn index() -> impl IntoResponse {
