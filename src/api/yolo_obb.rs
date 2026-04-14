@@ -10,12 +10,13 @@ use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
 use crate::dataset::Dataset;
+use crate::model::Point;
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, TS)]
 #[ts(export, export_to = "../front/src/bindings.ts")]
 pub struct ObbBox {
     pub class_id: usize,
-    pub points: [[f64; 2]; 4],
+    pub points: [Point; 4],
 }
 
 pub type Annotation = Vec<ObbBox>;
@@ -125,10 +126,10 @@ fn parse_yolo_obb(content: &str) -> (Annotation, Warnings) {
                 boxes.push(ObbBox {
                     class_id,
                     points: [
-                        [coords[0], coords[1]],
-                        [coords[2], coords[3]],
-                        [coords[4], coords[5]],
-                        [coords[6], coords[7]],
+                        Point { x: coords[0], y: coords[1] },
+                        Point { x: coords[2], y: coords[3] },
+                        Point { x: coords[4], y: coords[5] },
+                        Point { x: coords[6], y: coords[7] },
                     ],
                 });
             }
@@ -148,14 +149,14 @@ fn serialize_yolo_obb(boxes: &Annotation) -> String {
             format!(
                 "{} {} {} {} {} {} {} {} {}",
                 b.class_id,
-                b.points[0][0],
-                b.points[0][1],
-                b.points[1][0],
-                b.points[1][1],
-                b.points[2][0],
-                b.points[2][1],
-                b.points[3][0],
-                b.points[3][1],
+                b.points[0].x,
+                b.points[0].y,
+                b.points[1].x,
+                b.points[1].y,
+                b.points[2].x,
+                b.points[2].y,
+                b.points[3].x,
+                b.points[3].y,
             )
         })
         .collect::<Vec<_>>()
@@ -167,6 +168,10 @@ fn serialize_yolo_obb(boxes: &Annotation) -> String {
 mod tests {
     use super::*;
 
+    fn p(x: f64, y: f64) -> Point {
+        Point { x, y }
+    }
+
     #[test]
     fn parse_single_box() {
         let (boxes, warnings) = parse_yolo_obb("0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8\n");
@@ -174,7 +179,7 @@ mod tests {
             boxes,
             vec![ObbBox {
                 class_id: 0,
-                points: [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6], [0.7, 0.8]],
+                points: [p(0.1, 0.2), p(0.3, 0.4), p(0.5, 0.6), p(0.7, 0.8)],
             }],
         );
         assert!(warnings.is_empty());
@@ -190,11 +195,11 @@ mod tests {
             vec![
                 ObbBox {
                     class_id: 0,
-                    points: [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6], [0.7, 0.8]],
+                    points: [p(0.1, 0.2), p(0.3, 0.4), p(0.5, 0.6), p(0.7, 0.8)],
                 },
                 ObbBox {
                     class_id: 2,
-                    points: [[0.2, 0.3], [0.4, 0.5], [0.6, 0.7], [0.8, 0.9]],
+                    points: [p(0.2, 0.3), p(0.4, 0.5), p(0.6, 0.7), p(0.8, 0.9)],
                 },
             ],
         );
@@ -243,7 +248,7 @@ mod tests {
             (
                 vec![ObbBox {
                     class_id: 0,
-                    points: [[-0.1, 1.2], [0.3, 0.4], [0.5, 0.6], [0.7, 0.8]],
+                    points: [p(-0.1, 1.2), p(0.3, 0.4), p(0.5, 0.6), p(0.7, 0.8)],
                 }],
                 vec![],
             ),
@@ -260,11 +265,11 @@ mod tests {
                 vec![
                     ObbBox {
                         class_id: 0,
-                        points: [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6], [0.7, 0.8]],
+                        points: [p(0.1, 0.2), p(0.3, 0.4), p(0.5, 0.6), p(0.7, 0.8)],
                     },
                     ObbBox {
                         class_id: 1,
-                        points: [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6], [0.7, 0.8]],
+                        points: [p(0.1, 0.2), p(0.3, 0.4), p(0.5, 0.6), p(0.7, 0.8)],
                     },
                 ],
                 vec!["line 2: expected 9 fields, got 1".to_string()],
@@ -276,7 +281,7 @@ mod tests {
     fn round_trip() {
         let original = vec![ObbBox {
             class_id: 0,
-            points: [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6], [0.7, 0.8]],
+            points: [p(0.1, 0.2), p(0.3, 0.4), p(0.5, 0.6), p(0.7, 0.8)],
         }];
         let serialized = serialize_yolo_obb(&original);
         let (reparsed, warnings) = parse_yolo_obb(&serialized);

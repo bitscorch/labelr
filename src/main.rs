@@ -1,5 +1,6 @@
 mod api;
 mod dataset;
+mod model;
 
 use std::path::PathBuf;
 use std::sync::Arc;

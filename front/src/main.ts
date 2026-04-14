@@ -1,6 +1,6 @@
 import { getImages, getImageUrl, getAnnotation, saveAnnotation } from "./api";
-import type { ImageInfo, ObbBox } from "./bindings";
-import { Point, obbFromEdge, cornersToObbBox, obbToCorners, perpendicularDistance, pointInPolygon } from "./obb";
+import type { ImageInfo, ObbBox, Point } from "./bindings";
+import { obbFromEdge, cornersToObbBox, obbToCorners, perpendicularDistance, pointInPolygon } from "./obb";
 
 interface ViewState {
   offsetX: number;

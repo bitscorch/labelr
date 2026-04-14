@@ -1,9 +1,4 @@
-import type { ObbBox } from "./bindings";
-
-export interface Point {
-  x: number;
-  y: number;
-}
+import type { ObbBox, Point } from "./bindings";
 
 // Build OBB corners from edge-first 3-click method
 // p1, p2 = the two edge corners, width = perpendicular extent
@@ -33,17 +28,17 @@ export function cornersToObbBox(corners: [Point, Point, Point, Point], imgW: num
   return {
     class_id: classId,
     points: [
-      [corners[0].x / imgW, corners[0].y / imgH],
-      [corners[1].x / imgW, corners[1].y / imgH],
-      [corners[2].x / imgW, corners[2].y / imgH],
-      [corners[3].x / imgW, corners[3].y / imgH],
+      { x: corners[0].x / imgW, y: corners[0].y / imgH },
+      { x: corners[1].x / imgW, y: corners[1].y / imgH },
+      { x: corners[2].x / imgW, y: corners[2].y / imgH },
+      { x: corners[3].x / imgW, y: corners[3].y / imgH },
     ],
   };
 }
 
 // Denormalize ObbBox points to pixel space
 export function obbToCorners(box: ObbBox, imgW: number, imgH: number): [Point, Point, Point, Point] {
-  return box.points.map(([x, y]) => ({ x: x * imgW, y: y * imgH })) as [Point, Point, Point, Point];
+  return box.points.map((p) => ({ x: p.x * imgW, y: p.y * imgH })) as [Point, Point, Point, Point];
 }
 
 // Signed perpendicular distance from a point to the line defined by p1->p2

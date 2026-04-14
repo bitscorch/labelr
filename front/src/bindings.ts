@@ -4,4 +4,6 @@ export type AnnotationResponse = { boxes: Array<ObbBox>, warnings: Array<string>
 
 export type ImageInfo = { index: number, filename: string, has_annotation: boolean, };
 
-export type ObbBox = { class_id: number, points: [[number, number], [number, number], [number, number], [number, number]], };
+export type ObbBox = { class_id: number, points: [Point, Point, Point, Point], };
+
+export type Point = { x: number, y: number, };
