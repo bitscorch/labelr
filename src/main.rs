@@ -46,6 +46,8 @@ async fn main() -> anyhow::Result<()> {
         .route("/assets/{*path}", get(static_file))
         .route("/api/images", get(api::images::list))
         .route("/api/images/{index}", get(api::images::serve))
+        .route("/api/images/{index}/annotation", get(api::yolo_obb::get_annotation).put(api::yolo_obb::put_annotation))
+        .route("/api/classes", get(api::yolo_obb::get_classes).put(api::yolo_obb::put_classes))
         .with_state(dataset);
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await?;
