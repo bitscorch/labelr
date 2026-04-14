@@ -5,11 +5,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>labelr</title>
   <style>
-    body { margin: 0; background: #1a1a1a; color: #eee; font-family: system-ui; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #1a1a1a; color: #eee; font-family: system-ui; overflow: hidden; height: 100vh; }
+    #toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background: #252525;
+      border-bottom: 1px solid #333;
+    }
+    #toolbar button {
+      background: #333;
+      color: #eee;
+      border: 1px solid #555;
+      padding: 4px 12px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    #toolbar button:hover { background: #444; }
+    #image-info { font-size: 13px; color: #aaa; }
+    #canvas-container {
+      width: 100%;
+      height: calc(100vh - 41px);
+      position: relative;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
   </style>
 </head>
 <body>
-  <h1>labelr</h1>
+  <div id="toolbar">
+    <button id="prev-btn">&larr;</button>
+    <span id="image-info">0 / 0</span>
+    <button id="next-btn">&rarr;</button>
+  </div>
+  <div id="canvas-container">
+    <canvas id="canvas"></canvas>
+  </div>
   <script src="/assets/bundle.js"></script>
 </body>
 </html>
