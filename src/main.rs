@@ -1,3 +1,4 @@
+mod api;
 mod dataset;
 
 use std::path::PathBuf;
@@ -38,11 +39,14 @@ async fn main() -> anyhow::Result<()> {
     let dataset = Dataset::scan(&cli.images, cli.labels.as_deref())?;
     println!("labels dir: {}", dataset.labels_dir.display());
 
-    let _dataset = Arc::new(dataset);
+    let dataset = Arc::new(dataset);
 
     let app = Router::new()
         .route("/", get(index))
-        .route("/assets/{*path}", get(static_file));
+        .route("/assets/{*path}", get(static_file))
+        .route("/api/images", get(api::images::list))
+        .route("/api/images/{index}", get(api::images::serve))
+        .with_state(dataset);
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await?;
     println!("listening on http://127.0.0.1:3000");
