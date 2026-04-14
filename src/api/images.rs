@@ -7,10 +7,12 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use serde::Serialize;
+use ts_rs::TS;
 
 use crate::dataset::Dataset;
 
-#[derive(Serialize)]
+#[derive(Serialize, TS)]
+#[ts(export, export_to = "../front/src/bindings.ts")]
 pub struct ImageInfo {
     pub index: usize,
     pub filename: String,

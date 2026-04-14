@@ -7,10 +7,12 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use serde::{Deserialize, Serialize};
+use ts_rs::TS;
 
 use crate::dataset::Dataset;
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, TS)]
+#[ts(export, export_to = "../front/src/bindings.ts")]
 pub struct ObbBox {
     pub class_id: usize,
     pub points: [[f64; 2]; 4],
@@ -18,6 +20,13 @@ pub struct ObbBox {
 
 pub type Annotation = Vec<ObbBox>;
 pub type Warnings = Vec<String>;
+
+#[derive(Serialize, TS)]
+#[ts(export, export_to = "../front/src/bindings.ts")]
+pub struct AnnotationResponse {
+    pub boxes: Annotation,
+    pub warnings: Warnings,
+}
 
 pub async fn get_annotation(
     State(dataset): State<Arc<Dataset>>,
@@ -30,13 +39,13 @@ pub async fn get_annotation(
     let label_path = dataset.label_path(filename);
 
     if !label_path.exists() {
-        return Json(serde_json::json!({ "boxes": [], "warnings": [] })).into_response();
+        return Json(AnnotationResponse { boxes: vec![], warnings: vec![] }).into_response();
     }
 
     match std::fs::read_to_string(&label_path) {
         Ok(content) => {
             let (boxes, warnings) = parse_yolo_obb(&content);
-            Json(serde_json::json!({ "boxes": boxes, "warnings": warnings })).into_response()
+            Json(AnnotationResponse { boxes, warnings }).into_response()
         }
         Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
     }
